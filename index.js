@@ -1,42 +1,66 @@
 const input = document.getElementById("input");
 
-input.addEventListener("change", () => {
-  for (var num=0; num< input.files.length; num++) {
-  readXlsxFile(input.files[num])
-    .then((rows) => {
-      var data = manipulateRows(rows);
-      return data;
-    })
+var pdfContent = [];
+
+function addToPdf(content) {
+  pdfContent.push(content);
+}
+
+function getPdfContent() {
+  return pdfContent;
+}
+
+const readFile = (fInput) =>
+  readXlsxFile(fInput)
+    .then((rows) => rows)
     .then((data) => {
-      var content = generateSinglePage(data.pageData, data.pageDate, true);
-      return content;
-    })
-    .then((content) => {
-      var docDefinition = {
-        pageOrientation: "landscape",
-        pageSize: "LETTER",
-        pageMargins: [140, 30, 0, 0],
-        content: content,
-        styles: {
-          dept: {
-            fontSize: 14,
-            bold: true,
-            alignment: "left",
-          },
-          shift: {
-            alignment: "right",
-            margin: [8, 0, 0, 0],
-          },
-          employee: {},
-          date: {
-            margin: [250, 0, 0, 0],
-            bold: true,
-          },
-        },
-      };
-      pdfMake.createPdf(docDefinition).download("file.pdf");
+      return data;
     });
+
+const getRowData = async () => {
+  for (var num = 0; num < input.files.length; num++) {
+    var pdfData;
+    const d = await readFile(input.files[num]);
+    const data = manipulateRows(d);
+    if (num == 0) {
+      generateSinglePage(data.pageData, data.pageDate, true);
+    } else {
+      generateSinglePage(data.pageData, data.pageDate, false);
+    }
   }
+  const cc = getPdfContent();
+  const dd = buildDocDef(cc);
+  pdfMake.createPdf(dd).download(Date.now() + ".pdf");
+};
+
+function buildDocDef(ccc) {
+  var docDefinition = {
+    pageOrientation: "landscape",
+    pageSize: "LETTER",
+    pageMargins: [140, 30, 0, 0],
+    content: ccc,
+    styles: {
+      dept: {
+        fontSize: 14,
+        bold: true,
+        alignment: "left",
+      },
+      shift: {
+        alignment: "right",
+        margin: [8, 0, 0, 0],
+      },
+      employee: {},
+      date: {
+        margin: [250, 0, 0, 0],
+        bold: true,
+      },
+    },
+  };
+  return docDefinition;
+}
+
+input.addEventListener("change", () => {
+  getRowData();
 });
 
 function generateSinglePage(data, pageDate, first) {
@@ -79,40 +103,34 @@ function generateSinglePage(data, pageDate, first) {
     }
   }
 
-  var ob;
-
   if (first == true) {
-    ob = { text: pageDate, style: "date" };
+    addToPdf({ text: pageDate, style: "date" });
   } else {
-    ob = { text: pageDate, pageBreak: "before", style: "date" };
+    addToPdf({ text: pageDate, pageBreak: "before", style: "date" });
   }
 
-  var content = [
-    ob,
-    {
-      columns: [
-        {
-          width: "auto",
-          table: {
-            headerRows: 0,
-            body: leftTable,
-          },
-          layout: "noBorders",
+  addToPdf({
+    columns: [
+      {
+        width: "auto",
+        table: {
+          headerRows: 0,
+          body: leftTable,
         },
-        {
-          width: "auto",
+        layout: "noBorders",
+      },
+      {
+        width: "auto",
 
-          table: {
-            headerRows: 0,
-            body: rightTable,
-          },
-          layout: "noBorders",
+        table: {
+          headerRows: 0,
+          body: rightTable,
         },
-      ],
-      columnGap: 108,
-    },
-  ];
-  return content;
+        layout: "noBorders",
+      },
+    ],
+    columnGap: 108,
+  });
 }
 
 function manipulateRows(rows) {
