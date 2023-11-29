@@ -5,7 +5,7 @@ var pdfContent = [];
 // data schema, so to speak
 const schemaScheduleDateCol = 0;
 const schemaScheduleDateRow = 4;
-const skip1 = 3;
+const skip1 = 2;
 const skip2 = 2;
 // end of data schema
 
