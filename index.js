@@ -2,6 +2,17 @@ const input = document.getElementById("input");
 
 var pdfContent = [];
 
+// data schema, so to speak
+const schemaScheduleDateCol = 0;
+const schemaScheduleDateRow = 4;
+const skip1 = 3;
+const skip2 = 2;
+// end of data schema
+
+input.addEventListener("change", () => {
+  processFiles();
+});
+
 function addToPdf(content) {
   pdfContent.push(content);
 }
@@ -10,35 +21,12 @@ function getPdfContent() {
   return pdfContent;
 }
 
-const readFile = (fInput) =>
-  readXlsxFile(fInput)
-    .then((rows) => rows)
-    .then((data) => {
-      return data;
-    });
-
-const getRowData = async () => {
-  for (var num = 0; num < input.files.length; num++) {
-    var pdfData;
-    const d = await readFile(input.files[num]);
-    const data = manipulateRows(d);
-    if (num == 0) {
-      generateSinglePage(data.pageData, data.pageDate, true);
-    } else {
-      generateSinglePage(data.pageData, data.pageDate, false);
-    }
-  }
-  const cc = getPdfContent();
-  const dd = buildDocDef(cc);
-  pdfMake.createPdf(dd).download(Date.now() + ".pdf");
-};
-
-function buildDocDef(ccc) {
-  var docDefinition = {
+function definePdfDocument(content) {
+  var pdfDocument = {
     pageOrientation: "landscape",
     pageSize: "LETTER",
     pageMargins: [140, 30, 0, 0],
-    content: ccc,
+    content: content,
     styles: {
       dept: {
         fontSize: 14,
@@ -56,12 +44,8 @@ function buildDocDef(ccc) {
       },
     },
   };
-  return docDefinition;
+  return pdfDocument;
 }
-
-input.addEventListener("change", () => {
-  getRowData();
-});
 
 function generateSinglePage(data, pageDate, first) {
   var leftTable = [];
@@ -133,20 +117,17 @@ function generateSinglePage(data, pageDate, first) {
   });
 }
 
-function manipulateRows(rows) {
-  const scheduleDate = rows[4][0];
+function extractData(rows) {
+  const scheduleDate = rows[schemaScheduleDateRow][schemaScheduleDateCol];
 
   var hasGroupStarted = false;
-  var faveDate = false;
   var startGroupAdd = false;
   var currentGroupKey = null;
 
-  const skip1 = 3;
-  const skip2 = 2;
   var skip1Count = 0;
   var skip2Count = 0;
 
-  var sortedGroups = {
+  const sortedGroups = {
     left: [
       "Server",
       "Managers",
@@ -162,29 +143,32 @@ function manipulateRows(rows) {
   var groups = {};
   var newSort = { left: [], right: [] };
 
-  for (var c = 0; c < rows.length; c++) {
+  for (var row = 0; row < rows.length; row++) {
+    // get group name
     if (
-      rows[c][0] == "Schedule" &&
+      rows[row][0] == "Schedule" &&
       hasGroupStarted == false &&
-      rows[c][1] != "FOH" &&
-      rows[c][1] != "BOH" &&
-      rows[c][1] != "Bakers"
+      rows[row][1] != "FOH" &&
+      rows[row][1] != "BOH" &&
+      rows[row][1] != "Bakers"
     ) {
       hasGroupStarted = true;
-      groups[rows[c][1]] = { dept: rows[c][1], ee: [] };
-      currentGroupKey = rows[c][1];
-    } else if (hasGroupStarted == true) {
+      groups[rows[row][1]] = { dept: rows[row][1], ee: [] };
+      currentGroupKey = rows[row][1];
+    }
+    //
+    else if (hasGroupStarted == true) {
       if (startGroupAdd == false && skip1Count < skip1) {
         skip1Count++;
         if (skip1 == skip1Count) {
           startGroupAdd = true;
         }
-      } else if (startGroupAdd == true && rows[c][0] != null) {
+      } else if (startGroupAdd == true && rows[row][0] != null) {
         groups[currentGroupKey].ee.push({
-          name: rows[c][0],
-          shift: rows[c][1],
+          name: rows[row][0],
+          shift: rows[row][2],
         });
-      } else if (startGroupAdd == true && rows[c][0] == null) {
+      } else if (startGroupAdd == true && rows[row][0] == null) {
         startGroupAdd = false;
         skip2Count++;
       } else if (startGroupAdd == false && skip2Count < skip2) {
@@ -200,16 +184,18 @@ function manipulateRows(rows) {
     }
   }
 
-  var keys = Object.keys(groups);
-
-  for (var bb = 0; bb < sortedGroups.left.length; bb++) {
-    key = sortedGroups.left[bb];
+  for (var leftGroup = 0; leftGroup < sortedGroups.left.length; leftGroup++) {
+    var key = sortedGroups.left[leftGroup];
     if (key in groups) {
       newSort.left.push(groups[key]);
     }
   }
-  for (var bc = 0; bc < sortedGroups.right.length; bc++) {
-    key = sortedGroups.right[bc];
+  for (
+    var rightGroup = 0;
+    rightGroup < sortedGroups.right.length;
+    rightGroup++
+  ) {
+    var key = sortedGroups.right[rightGroup];
     if (key in groups) {
       newSort.right.push(groups[key]);
     }
@@ -217,3 +203,26 @@ function manipulateRows(rows) {
 
   return { pageData: newSort, pageDate: scheduleDate };
 }
+
+const readFile = (fInput) =>
+  readXlsxFile(fInput)
+    .then((rows) => rows)
+    .then((data) => {
+      return data;
+    });
+
+const processFiles = async () => {
+  for (var file = 0; file < input.files.length; file++) {
+    const fileRows = await readFile(input.files[file]);
+    const formattedData = extractData(fileRows);
+    var isFirstPage = (file == 0) ? true : false;
+    generateSinglePage(
+      formattedData.pageData,
+      formattedData.pageDate,
+      isFirstPage
+    );
+  }
+  const content = getPdfContent();
+  const pdfDocument = definePdfDocument(content);
+  pdfMake.createPdf(pdfDocument).download(Date.now() + ".pdf");
+};
