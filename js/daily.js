@@ -1,4 +1,4 @@
-const input = document.getElementById("input");
+const input = document.getElementById("dailyInput");
 
 var pdfContent = [];
 

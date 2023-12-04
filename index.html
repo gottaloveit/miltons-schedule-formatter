@@ -1,24 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Schedule Formatter</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="index.css">
-        <script src="https://cdn.jsdelivr.net/npm/read-excel-file@5.5.0/bundle/read-excel-file.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.js" integrity="sha512-iKv9YWIwhexI0fRGos8mMuFFHhUCbpHTHFPrdByZc6C3QqMRuFN+3fdIbq6EDClHh+hYSAOf10T9VrBDPF92jA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js" integrity="sha512-cktKDgjEiIkPVHYbn8bh/FEyYxmt4JDJJjOCu5/FQAkW4bc911XtKYValiyzBiJigjVEvrIAyQFEbRJZyDA1wQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    </head>
-    <body>
-        <h1>💖 Hello !</h1>
-        <div>Press button to select the schedules.
-        <ul>
-        <li>You can select as many as you want when the prompt open</li>
-        </ul>
-        <div>
-        <input type="file" id="input" multiple/> Select Files
-        <script src="index.js"></script>        
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Schedule Formatter</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
+        integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/theme.min.css"
+        integrity="sha512-hbs/7O+vqWZS49DulqH1n2lVtu63t3c3MTAn0oYMINS5aT8eIAbJGDXgLt6IxDHcWyzVTgf9XyzZ9iWyVQ7mCQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="\css\index.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"
+        integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.js"
+        integrity="sha512-iKv9YWIwhexI0fRGos8mMuFFHhUCbpHTHFPrdByZc6C3QqMRuFN+3fdIbq6EDClHh+hYSAOf10T9VrBDPF92jA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js"
+        integrity="sha512-cktKDgjEiIkPVHYbn8bh/FEyYxmt4JDJJjOCu5/FQAkW4bc911XtKYValiyzBiJigjVEvrIAyQFEbRJZyDA1wQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+    <div class="head">
+        <h1>Milton's Schedule Formatter</h1>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div>
+                    <h3>Opensimsim Export Instructions</h3>
+                </div>
+                <ol>
+                    <li>In opensimsim scheduler, on the left side top area, make sure you have:
+                        <ul>
+                            <li>View the “View” set to “Week” </li>
+                            <li>and the week that is selected is the correct week you want printed</li>
+                        </ul>
+                    </li>
+                    <li>On the left side, click the Printer icon and choose “Print Schedule”</li>
+                    <li>Change Presets to:
+                        <ul>
+                            <li>“Print Selected Week for All Departments”</li>
+                            <li>“Page Format” set to Week View</li>
+                            <li>“Output” set to Excel</li>
+                        </ul>
+                    </li>
+                    <li>Click “Generate Printout”</li>
+                    <li>Wait about 10 seconds, then click “Download Report” and save the file to your computer</li>
+                    <li>Then click in the box to bring up a calendar and select the Monday that matches what you
+                        downloaded.
+                    </li>
+                    <li>Click the button “Choose File” and select the file you just downloaded and saved from opensimsim
+                    </li>
+                    <li>Within a second, it will prompt you to save a PDF file to your computer. That PDF is the
+                        schedule.
+                    </li>
+                </ol>
+            </div>
+            <div class="col">
+                <div>
+                    <h3>Report Formatter</h3>
+                </div>
+                <ol>
+                    <li>
+                        <div>Click in the box to choose the start date of the report to match the opensimsim
+                            download<br>
+                            <input type="text" name="weeklyStartDate" id="weeklyStartDate">
+                        </div>
+                    </li>
+                    <li>
+                        <div>Press button to select the weekly schedule file.<br>(You can only select a single file from
+                            opensimsim)<br>
+                            <input type="file" id="weeklyInput" class="inputFileButton" accept=".xlsx,.xls" />
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <script src="\js\weekly.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.inputFileButton').prop('disabled', true);
+            $.datepicker.setDefaults({
+                firstDay: 1,
+                onClose: function (text, inst) {
+                    if (text == "") {
+                        $("#weeklyInput").prop('disabled', true);
+                    } else {
+                        $("#weeklyInput").prop('disabled', false);
+                    }
+                },
+                beforeShowDay: function (d) {
+                    var m = moment(d);
+                    var en = m.weekday() === 1;
+                    return [en, ""];
+                }
+            });
+            $("#weeklyStartDate").datepicker();
+        });
+        $("#weeklyInput").on("change", function () {
+            var date = $('#weeklyStartDate').val();
+            const weekly = new Weekly($(this)[0].files[0], date);
+            weekly.run();
+        });
+    </script>
+</body>
+
 </html>
