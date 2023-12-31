@@ -86,6 +86,24 @@
             </div>
         </div>
     </div>
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const isDebug = urlParams.has('debug');
+        let doLogging = false;
+
+        function doDebugLog(functionName, variableName, data) {
+            if (doLogging) {
+                var message = "function: " + functionName + ", variable: " + variableName + ", data: " + JSON.stringify(data, null, 2);
+                console.log(message);
+            }
+        }
+
+        if (isDebug) {
+            doLogging = true;
+            doDebugLog("test opening", "debug log", "none");
+        }
+    </script>
     <script src="\js\weekly.js"></script>
     <script>
         $(document).ready(function () {
